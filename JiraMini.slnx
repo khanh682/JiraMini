@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/JiraMini.Api/JiraMini.Api.csproj" />
+    <Project Path="src/JiraMini.Application/JiraMini.Application.csproj" />
+    <Project Path="src/JiraMini.Domain/JiraMini.Domain.csproj" />
+    <Project Path="src/JiraMini.Infrastructure/JiraMini.Infrastructure.csproj" />
+    <Project Path="src/JiraMini.Shared/JiraMini.Shared.csproj" />
+  </Folder>
+</Solution>
