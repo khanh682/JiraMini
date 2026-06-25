@@ -1,0 +1,6 @@
+@JiraMini.Api_HostAddress = http://localhost:5182
+
+GET {{JiraMini.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
