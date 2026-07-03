@@ -1,8 +1,13 @@
 using JiraMini.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using JiraMini.Api.Services;
 using JiraMini.Application.Common.Interfaces;
 using JiraMini.Infrastructure.Security;
 using JiraMini.Application.Features.Auth.Register;
+using JiraMini.Application.Features.Auth.Login;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +24,36 @@ builder.Services.AddScoped<RegisterHandler>();
 builder.Services.AddScoped<IApplicationDbContext,AppDbContext>();
 
 builder.Services.AddScoped<IPasswordHasher,PasswordHasher>();
+builder.Services.AddScoped<LoginHandler>();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+
+var jwt = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+
+            ValidIssuer = jwt.Issuer,
+            ValidAudience = jwt.Audience,
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt.Key)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 var app = builder.Build();
 
@@ -29,6 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 var summaries = new[]
